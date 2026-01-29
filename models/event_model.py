@@ -21,6 +21,10 @@ class EventModel:
         db = get_db()
         collection = db[EventModel.COLLECTION_NAME]
         
+        # Convert timestamp string to datetime for proper sorting
+        timestamp_str = event_data.get('timestamp')
+        timestamp_dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        
         # Store exactly as per requirements schema
         document = {
             'request_id': event_data.get('request_id'),
@@ -28,7 +32,8 @@ class EventModel:
             'action': event_data.get('action'),
             'from_branch': event_data.get('from_branch'),
             'to_branch': event_data.get('to_branch'),
-            'timestamp': event_data.get('timestamp')
+            'timestamp': timestamp_str,  # Keep original string format for display
+            'timestamp_dt': timestamp_dt  # Add datetime for sorting
         }
         
         result = collection.insert_one(document)
@@ -47,12 +52,16 @@ class EventModel:
         db = get_db()
         collection = db[EventModel.COLLECTION_NAME]
         
-        events = collection.find().sort('timestamp', -1).limit(limit)
+        # Sort by timestamp_dt (datetime) instead of timestamp (string) for proper chronological order
+        events = collection.find().sort('timestamp_dt', -1).limit(limit)
         
         # Convert ObjectId to string for JSON serialization
         result = []
         for event in events:
             event['_id'] = str(event['_id'])
+            # Remove timestamp_dt from response (only used for sorting)
+            if 'timestamp_dt' in event:
+                del event['timestamp_dt']
             result.append(event)
         
         return result
