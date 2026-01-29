@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Flask application
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: webhook-app
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/webhook_db
+      - MONGO_DB_NAME=webhook_db
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET:-}
+      - SECRET_KEY=${SECRET_KEY:-change-this-secret-key}
+      - DEBUG=False
+    depends_on:
+      - mongo
+    volumes:
+      - ../ui:/app/static
+    restart: unless-stopped
+    networks:
+      - webhook-network
+
+  # MongoDB database
+  mongo:
+    image: mongo:7.0
+    container_name: webhook-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+    networks:
+      - webhook-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo-data:
+    driver: local
+
+networks:
+  webhook-network:
+    driver: bridge

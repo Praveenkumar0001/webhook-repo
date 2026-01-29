@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Webhook Monitor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GitHub Webhook Monitor</h1>
+            <p class="subtitle">Real-time webhook event tracking</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <span class="stat-label">Total Events</span>
+                <span class="stat-value" id="total-events">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Last Updated</span>
+                <span class="stat-value" id="last-update">Never</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Auto-Refresh</span>
+                <span class="stat-value">15s</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="refresh-btn" class="btn btn-primary">Refresh Now</button>
+            <button id="clear-btn" class="btn btn-secondary">Clear Display</button>
+        </div>
+
+        <div id="loading" class="loading">Loading events...</div>
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div class="events-container">
+            <h2>Recent Events</h2>
+            <div id="events-list" class="events-list">
+                <!-- Events will be dynamically inserted here -->
+            </div>
+            <div id="no-events" class="no-events">
+                No events received yet. Configure your GitHub webhook to start receiving events.
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
