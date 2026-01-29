@@ -35,8 +35,13 @@ def verify_signature(payload_body, signature_header, secret):
     return hmac.compare_digest(expected_signature, signature_header)
 
 
-@webhook_bp.route("/webhook", methods=["POST"])
+@webhook_bp.route("/webhook", methods=["GET", "POST"])
 def receive_webhook():
+    # Health check for GET requests
+    if request.method == "GET":
+        return jsonify({"status": "Webhook endpoint is up"}), 200
+    
+    # Handle POST requests (actual webhooks)
     try:
         event_type = request.headers.get("X-GitHub-Event")
         signature = request.headers.get("X-Hub-Signature-256")
@@ -63,10 +68,4 @@ def receive_webhook():
     except Exception as e:
         current_app.logger.error(f"Webhook error: {e}")
         return jsonify({"error": "Internal server error"}), 500
-
-
-# Add GET /webhook for health/debugging
-@webhook_bp.route("/webhook", methods=["GET"])
-def webhook_health():
-    return jsonify({"status": "Webhook endpoint is up"}), 200
 
